@@ -148,3 +148,129 @@
 .light .comment {
   color: #008000;
 }
+
+/* Add these media queries at the end of AccordionSection.css */
+
+/* ============================================ */
+/* RESPONSIVE ACCORDION STYLES */
+/* ============================================ */
+
+/* iPad and smaller tablets */
+@media (max-width: 1024px) {
+  .accordion-header {
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+
+  .code-wrapper {
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  .line-numbers {
+    padding: 18px 10px;
+    min-width: 45px;
+  }
+
+  .line-numbers .line-number {
+    height: 18px;
+  }
+
+  .code-content {
+    padding: 18px 16px 18px 14px;
+  }
+
+  .code-line {
+    min-height: 18px;
+  }
+}
+
+/* Mobile devices (iPhone, small tablets) */
+@media (max-width: 768px) {
+  .accordion-item {
+    margin-bottom: 12px;
+  }
+
+  .accordion-header {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .accordion-icon {
+    font-size: 12px;
+  }
+
+  .code-wrapper {
+    font-size: 12px;
+    line-height: 17px;
+  }
+
+  .line-numbers {
+    padding: 16px 8px;
+    min-width: 40px;
+  }
+
+  .line-numbers .line-number {
+    height: 17px;
+  }
+
+  .code-content {
+    padding: 16px 12px 16px 12px;
+  }
+
+  .code-line {
+    min-height: 17px;
+  }
+}
+
+/* Small mobile devices (iPhone SE, small phones) */
+@media (max-width: 480px) {
+  .accordion-item {
+    margin-bottom: 10px;
+  }
+
+  .accordion-header {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .accordion-icon {
+    font-size: 11px;
+  }
+
+  .code-wrapper {
+    font-size: 11px;
+    line-height: 16px;
+  }
+
+  .line-numbers {
+    padding: 14px 6px;
+    min-width: 35px;
+    font-size: 10px;
+  }
+
+  .line-numbers .line-number {
+    height: 16px;
+  }
+
+  .code-content {
+    padding: 14px 10px 14px 10px;
+  }
+
+  .code-line {
+    min-height: 16px;
+  }
+}
+
+/* Horizontal scrolling for code on small screens */
+@media (max-width: 768px) {
+  .code-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
+  }
+
+  .code-content {
+    overflow-x: auto;
+  }
+}
