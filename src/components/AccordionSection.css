@@ -51,8 +51,6 @@
   text-align: right;
   user-select: none;
   min-width: 50px;
-  flex-shrink: 0;
-  /* Prevent line numbers from shrinking */
 }
 
 .line-numbers .line-number {
@@ -69,7 +67,6 @@
 .code-line {
   min-height: 19px;
   white-space: pre;
-  /* Default: no wrapping for desktop */
 }
 
 /* Dark theme specific styles */
@@ -179,16 +176,10 @@
 
   .code-content {
     padding: 18px 16px 18px 14px;
-    overflow-x: visible;
-    /* No horizontal scroll */
   }
 
   .code-line {
     min-height: 18px;
-    white-space: pre-wrap;
-    /* ENABLE WRAPPING */
-    word-break: break-word;
-    /* Break long words if needed */
   }
 }
 
@@ -210,8 +201,6 @@
   .code-wrapper {
     font-size: 12px;
     line-height: 17px;
-    overflow-x: visible;
-    /* No horizontal scroll */
   }
 
   .line-numbers {
@@ -225,16 +214,10 @@
 
   .code-content {
     padding: 16px 12px 16px 12px;
-    overflow-x: visible;
-    /* No horizontal scroll */
   }
 
   .code-line {
     min-height: 17px;
-    white-space: pre-wrap;
-    /* ENABLE WRAPPING */
-    word-break: break-word;
-    /* Break long words if needed */
   }
 }
 
@@ -256,8 +239,6 @@
   .code-wrapper {
     font-size: 11px;
     line-height: 16px;
-    overflow-x: visible;
-    /* No horizontal scroll */
   }
 
   .line-numbers {
@@ -272,15 +253,22 @@
 
   .code-content {
     padding: 14px 10px 14px 10px;
-    overflow-x: visible;
-    /* No horizontal scroll */
   }
 
   .code-line {
     min-height: 16px;
-    white-space: pre-wrap;
-    /* ENABLE WRAPPING */
-    word-break: break-word;
-    /* Break long words if needed */
+  }
+}
+
+/* Horizontal scrolling for code on small screens */
+@media (max-width: 768px) {
+  .code-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
+  }
+
+  .code-content {
+    overflow-x: auto;
   }
 }
