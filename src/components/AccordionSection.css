@@ -15,12 +15,18 @@
   user-select: none;
 }
 
+.accordion-header:hover {
+  transform: translateY(-1px);
+  /* Lifts up 1px */
+}
+
 .accordion-header.active {
   border-radius: 4px 4px 0 0;
 }
 
 .accordion-icon {
-  transition: transform 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
   font-size: 14px;
 }
 
@@ -31,7 +37,7 @@
 .accordion-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 0 0 4px 4px;
 }
 
@@ -44,6 +50,14 @@
   overflow-x: auto;
   font-size: 14px;
   line-height: 19px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+}
+
+.accordion-content.open .code-wrapper {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .line-numbers {
