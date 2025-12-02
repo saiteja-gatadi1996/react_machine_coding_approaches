@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import './AccordionSection.css';
 
-function AccordionSection({ title, code, index }) {
-  const [isOpen, setIsOpen] = useState(false);
+function AccordionSection({ title, code, isOpen, onToggle }) {
   const contentRef = useRef(null);
   const [height, setHeight] = useState(0);
 
@@ -11,10 +10,6 @@ function AccordionSection({ title, code, index }) {
       setHeight(contentRef.current.scrollHeight);
     }
   }, [code]);
-
-  const toggleAccordion = () => {
-    setIsOpen(!isOpen);
-  };
 
   const renderCode = (codeString) => {
     const lines = codeString.split('\n');
@@ -49,7 +44,7 @@ function AccordionSection({ title, code, index }) {
     <div className='accordion-item'>
       <div
         className={`accordion-header ${isOpen ? 'active' : ''}`}
-        onClick={toggleAccordion}
+        onClick={onToggle}
       >
         <span>{title}</span>
         <span className='accordion-icon'>▶</span>
