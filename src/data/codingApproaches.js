@@ -2103,4 +2103,1183 @@ transform: translateX(100%)
 // OR operator short-circuit → If first truthy, uses it; otherwise second
 // Greater than comparison → index 0,1,2 are < rating 3, so all filled`,
   },
+  {
+    title: '16_starRating_half_star',
+    code: `// ============================================
+// COMPONENT STRUCTURE
+// ============================================
+
+// App.jsx → renders <StarRating /> component
+// StarRating.jsx → contains star rating with half-star support
+
+// ============================================
+// STATE MANAGEMENT
+// ============================================
+
+// State: rating → useState(0)
+// → Stores selected rating (can be decimal like 2.5, 3.5, 4.5)
+// → Starts at 0 (no rating selected)
+
+// Note: No hoverRating state in this version (simpler, click-only)
+
+// ============================================
+// RATING MESSAGES ARRAY
+// ============================================
+
+// Constant: ratingMessages
+// → ['Awful', 'Poor', 'Fair', 'Good', 'Excellent']
+// → Same as before, index 0-4 maps to 1-5 star ratings
+
+// ============================================
+// isLeftHalf HELPER FUNCTION
+// ============================================
+
+// Purpose: Detect if click is on left or right half of star
+
+// Accepts: event (click event object)
+
+// STEP 1: Get element's position
+// → const rect = event.currentTarget.getBoundingClientRect()
+// → getBoundingClientRect() returns element's size and position
+
+// STEP 2: Calculate click position relative to element
+// → const x = event.clientX - rect.left
+// → event.clientX = absolute X position of click
+// → rect.left = left edge of element
+// → Subtraction gives position within the element
+
+// STEP 3: Check if in left half
+// → return x < rect.width / 2
+// → Example: star width 40px, click at 15px → 15 < 20 → true (left half)
+// → Example: star width 40px, click at 25px → 25 < 20 → false (right half)
+
+// ============================================
+// getRatingMessage FUNCTION
+// ============================================
+
+// Same as before:
+// → return ratingMessages[Math.ceil(currentRatingValue) - 1]
+// → Math.ceil rounds up (2.5 becomes 3)
+// → Subtract 1 for array index
+
+// ============================================
+// handleClick FUNCTION
+// ============================================
+
+// Accepts: (value, isHalf = false)
+// → value: star number (1-5)
+// → isHalf: boolean indicating if left half was clicked
+
+// Logic:
+// → const newRating = isHalf ? value - 0.5 : value
+
+// Examples:
+// → value = 3, isHalf = true → newRating = 3 - 0.5 = 2.5
+// → value = 3, isHalf = false → newRating = 3
+
+// Update state:
+// → setRating(newRating)
+
+// ============================================
+// renderStar FUNCTION (CORE LOGIC)
+// ============================================
+
+// Accepts: index (0 to 4)
+
+// STEP 1: Calculate fullStar
+// → const fullStar = rating > index
+// → Same as before, checks if star should be fully filled
+
+// STEP 2: Calculate halfStar (NEW LOGIC)
+// → const halfStar = rating > index && rating < index + 1
+// → Checks if rating falls between index and index+1
+
+// Examples:
+// → rating = 2.5, index = 2 → 2.5 > 2 && 2.5 < 3 → true (3rd star is half)
+// → rating = 2.5, index = 1 → 2.5 > 1 && 2.5 < 2 → false (2nd star full)
+// → rating = 2.5, index = 3 → 2.5 > 3 → false (4th star empty)
+
+// STEP 3: Create handleStarClick function (nested)
+// → Detects which half of star was clicked
+// → const isHalf = isLeftHalf(event)
+// → Calls: handleClick(index + 1, isHalf)
+// → Example: Click left of 4th star (index 3) → handleClick(4, true) → rating = 3.5
+
+// STEP 4: Calculate CSS classes
+// → Base: 'star' (always present)
+// → Conditional: 'full' when fullStar && !halfStar
+// → Conditional: 'half' when halfStar
+// → Template: \`star \${fullStar && !halfStar ? 'full' : ''} \${halfStar ? 'half' : ''}\`
+
+// STEP 5: Return span with conditional rendering
+
+// Span attributes:
+// → key={index}
+// → className={starClasses}
+// → onClick={handleStarClick}
+
+// Display logic (3 cases):
+
+// CASE 1: halfStar is true
+// → Render composite half-star using nested spans:
+// → Wrapper span with className 'star-wrapper'
+// → Background: span with '☆' (empty star) and className 'star-empty'
+// → Foreground: span with '★' (filled star) and className 'star-half-filled'
+// → CSS will clip the filled star to show only left half
+
+// CASE 2: fullStar is true (but not halfStar)
+// → Simply render: '★'
+
+// CASE 3: empty star (default)
+// → Simply render: '☆'
+
+// ============================================
+// JSX STRUCTURE
+// ============================================
+
+// Container div with className 'container'
+
+// Star rating wrapper div:
+// → className 'star-rating-wrapper'
+
+// Inside wrapper, two divs:
+
+// DIV 1: Star rating div
+// → className 'star-rating'
+// → Contains: Array.from({ length: 5 }, (_, index) => renderStar(index))
+
+// DIV 2: Rating message span
+// → className 'rating-message'
+// → Contains: <strong>{getRatingMessage(rating)}</strong>
+
+// ============================================
+// CSS APPROACH - HALF STAR DISPLAY
+// ============================================
+
+// .star (base styling):
+// → Same as before: cursor pointer, font-size, color grey, margin
+
+// .star.full (filled star):
+// → color: gold
+
+// .star-wrapper (NEW):
+// → position: relative
+// → display: inline-block
+// → Needed for absolute positioning of inner spans
+
+// .star-empty (NEW - background empty star):
+// → position: relative or static
+// → color: grey
+// → This is the full empty star visible on right half
+
+// .star-half-filled (NEW - foreground filled star, clipped):
+// → position: absolute
+// → top: 0, left: 0 (overlay on top of empty star)
+// → color: gold
+// → width: 50% (CRITICAL: only show left half)
+// → overflow: hidden (clips the star to show only left portion)
+// → z-index: 1 (appears above empty star)
+
+// How it works visually:
+// → Empty star (☆) displays full width in grey
+// → Filled star (★) overlays on top in gold, but clipped to 50% width
+// → Result: Left half gold (filled), right half grey (empty)
+
+// ============================================
+// HALF-STAR RATING FLOW
+// ============================================
+
+// Initial state:
+// → rating = 0
+// → All stars empty (☆) grey
+
+// User clicks left half of 3rd star (index 2):
+// → handleStarClick triggered
+// → isLeftHalf(event) returns true
+// → handleClick(3, true) called
+// → newRating = 3 - 0.5 = 2.5
+// → setRating(2.5)
+// → Component re-renders
+
+// After setting rating to 2.5:
+// → Star 0 (index 0): rating 2.5 > 0 → fullStar true, halfStar false → shows ★ gold
+// → Star 1 (index 1): rating 2.5 > 1 → fullStar true, halfStar false → shows ★ gold
+// → Star 2 (index 2): rating 2.5 > 2 && 2.5 < 3 → halfStar true → shows composite half-star
+// → Star 3 (index 3): rating 2.5 not > 3 → fullStar false → shows ☆ grey
+// → Star 4 (index 4): rating 2.5 not > 4 → fullStar false → shows ☆ grey
+// → Message: getRatingMessage(2.5) → Math.ceil(2.5) - 1 = 3 - 1 = 2 → "Fair"
+
+// User clicks right half of 4th star (index 3):
+// → isLeftHalf(event) returns false
+// → handleClick(4, false) called
+// → newRating = 4
+// → setRating(4)
+// → First 4 stars show ★ gold, 5th star shows ☆ grey
+// → Message: "Good"
+
+// User clicks left half of 5th star (index 4):
+// → isLeftHalf(event) returns true
+// → handleClick(5, true) called
+// → newRating = 5 - 0.5 = 4.5
+// → First 4 stars full, 5th star half-filled
+// → Message: Math.ceil(4.5) - 1 = 5 - 1 = 4 → "Excellent"
+
+// ============================================
+// KEY CONCEPTS
+// ============================================
+
+// Why getBoundingClientRect? → Get element's exact position and size
+// Why event.clientX - rect.left? → Convert absolute click to relative position
+// Why x < rect.width / 2? → Determine if click is in left or right half
+// Why rating > index && rating < index + 1? → Check if decimal rating falls in this star's range
+// Why composite spans for half-star? → Layer filled over empty, clip filled to 50%
+// Why position absolute on star-half-filled? → Overlay on top of empty star
+// Why width 50% with overflow hidden? → Show only left half of filled star
+// Why fullStar && !halfStar for 'full' class? → Exclude half-stars from full styling
+// Why Math.ceil in getRatingMessage? → Round 2.5 to 3 for message lookup
+// value - 0.5 → Convert full star click to half-star rating
+// Two-span technique → Creates visual half-star effect without custom graphics`,
+  },
+  {
+    title: '17_ticTacToe',
+    code: `// ============================================
+// COMPONENT STRUCTURE
+// ============================================
+
+// App.jsx → contains all game logic (no separate components needed)
+
+// ============================================
+// STATE MANAGEMENT
+// ============================================
+
+// State 1: squares → useState(Array(9).fill(null))
+// → Array with 9 null values representing empty board
+// → Example: [null, null, null, null, null, null, null, null, null]
+// → Indices 0-8 map to board positions (0=top-left, 8=bottom-right)
+
+// State 2: isXNext → useState(true)
+// → Tracks whose turn it is
+// → true = X's turn, false = O's turn
+// → Starts as true (X always goes first)
+
+// ============================================
+// WINNING COMBINATIONS ARRAY
+// ============================================
+
+// Define all 8 possible winning patterns:
+// → 3 rows: [0,1,2], [3,4,5], [6,7,8]
+// → 3 columns: [0,3,6], [1,4,7], [2,5,8]
+// → 2 diagonals: [0,4,8], [2,4,6]
+
+// Store in array: winningCombinations
+// → Example: [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]]
+
+// ============================================
+// calculateWinner FUNCTION
+// ============================================
+
+// Purpose: Check if anyone has won the game
+
+// STEP 1: Loop through all winning combinations
+// → for loop: i = 0 to winningCombinations.length
+
+// STEP 2: Destructure current combination
+// → const [a, b, c] = winningCombinations[i]
+// → Example: First iteration → [a, b, c] = [0, 1, 2]
+
+// STEP 3: Check if three positions match
+// → Condition: squares[a] && squares[a] === squares[b] && squares[a] === squares[c]
+
+// Breaking down the condition:
+// → squares[a] → Checks position is not null (someone played there)
+// → squares[a] === squares[b] → First two positions match
+// → squares[a] === squares[c] → First and third positions match
+// → All three must be true for a win
+
+// Example:
+// → squares = ['X', 'X', 'X', null, null, null, null, null, null]
+// → Checking [0,1,2]: squares[0]='X', squares[1]='X', squares[2]='X'
+// → 'X' && 'X'==='X' && 'X'==='X' → true
+
+// STEP 4: Return winner or null
+// → If match found: return squares[a] (returns 'X' or 'O')
+// → If no match after all loops: return null
+
+// Store result in variable:
+// → let winner = calculateWinner()
+
+// ============================================
+// STATUS MESSAGE LOGIC
+// ============================================
+
+// Variable: status (not state, just display message)
+
+// Logic:
+// → if (winner) → status = \`Winner is: \${winner} 🎁🎉💥\`
+// → else → status = \`Next Player: \${isXNext ? 'X' : 'O'}\`
+
+// Example outcomes:
+// → "Winner is: X 🎁🎉💥"
+// → "Next Player: O"
+
+// ============================================
+// handleClick FUNCTION (CORE GAME LOGIC)
+// ============================================
+
+// Accepts: i (index of clicked square, 0-8)
+
+// STEP 1: Check if game is over
+// → if (winner) return
+// → Prevents moves after someone wins
+// → Early return stops function execution
+
+// STEP 2: Create copy of squares array
+// → const newSquares = [...squares]
+// → Why copy? Never mutate state directly
+// → Spread operator creates new array with same values
+
+// STEP 3: Update clicked square
+// → newSquares[i] = isXNext ? 'X' : 'O'
+// → If X's turn, place 'X'; if O's turn, place 'O'
+// → Example: isXNext=true, i=4 → newSquares[4] = 'X'
+
+// STEP 4: Update board state
+// → setSquares(newSquares)
+// → Triggers re-render with new board configuration
+
+// STEP 5: Toggle player turn
+// → setIsXNext(!isXNext)
+// → Flips between true and false
+// → Example: true → false (X's turn → O's turn)
+
+// ============================================
+// renderSquare FUNCTION
+// ============================================
+
+// Purpose: Render individual square button
+
+// Accepts: i (square index 0-8)
+
+// Returns button element with:
+// → className='square' for styling
+// → onClick={() => handleClick(i)} → passes index to handler
+// → Display: {squares[i]} → shows 'X', 'O', or nothing (null)
+
+// Example:
+// → renderSquare(0) → button for top-left corner
+// → If squares[0] = 'X', button shows 'X'
+
+// ============================================
+// resetGame FUNCTION
+// ============================================
+
+// Purpose: Reset game to initial state
+
+// STEP 1: Reset turn to X
+// → setIsXNext(true)
+// → X always starts
+
+// STEP 2: Clear the board
+// → setSquares(Array(9).fill(null))
+// → Creates new array of 9 nulls
+// → All squares become empty
+
+// ============================================
+// JSX STRUCTURE
+// ============================================
+
+// Main container div with className 'app_container'
+
+// SECTION 1: Status display
+// → div with className 'status'
+// → Shows: {status} (winner message or next player)
+
+// SECTION 2: Game board (3x3 grid using nested maps)
+// → Outer map: [0, 1, 2].map((row) => ...)
+// → Creates 3 rows (row = 0, 1, 2)
+
+// Each row is a div with:
+// → key={row} for React list rendering
+// → className='row' for styling
+
+// Inner map inside each row: [0, 1, 2].map((col) => ...)
+// → Creates 3 columns per row (col = 0, 1, 2)
+// → Calls: renderSquare(row * 3 + col)
+
+// Index calculation: row * 3 + col
+// → Row 0: 0*3+0=0, 0*3+1=1, 0*3+2=2 (squares 0,1,2)
+// → Row 1: 1*3+0=3, 1*3+1=4, 1*3+2=5 (squares 3,4,5)
+// → Row 2: 2*3+0=6, 2*3+1=7, 2*3+2=8 (squares 6,7,8)
+
+// SECTION 3: Reset button
+// → button with className 'resetGame'
+// → onClick={resetGame}
+// → Text: "Reset Game"
+
+// ============================================
+// GAME FLOW EXAMPLE
+// ============================================
+
+// Initial state:
+// → squares = [null, null, null, null, null, null, null, null, null]
+// → isXNext = true
+// → winner = null
+// → status = "Next Player: X"
+// → All squares empty
+
+// Player X clicks center square (index 4):
+// → handleClick(4) called
+// → winner check: null → continue
+// → newSquares = [...squares]
+// → newSquares[4] = 'X' (isXNext is true)
+// → setSquares(newSquares) → squares[4] now 'X'
+// → setIsXNext(false) → O's turn
+// → Re-render shows X in center
+// → status = "Next Player: O"
+
+// Player O clicks top-left (index 0):
+// → handleClick(0) called
+// → newSquares[0] = 'O' (isXNext is false)
+// → setSquares updates
+// → setIsXNext(true) → X's turn
+// → status = "Next Player: X"
+
+// Continuing play... X gets winning pattern [0,1,2]:
+// → squares = ['X', 'X', 'X', 'O', 'X', null, 'O', null, null]
+// → calculateWinner checks [0,1,2]
+// → squares[0]='X', squares[1]='X', squares[2]='X'
+// → All match → returns 'X'
+// → winner = 'X'
+// → status = "Winner is: X 🎁🎉💥"
+// → Further clicks ignored (if winner check in handleClick)
+
+// Player clicks Reset:
+// → resetGame called
+// → setIsXNext(true) → back to X's turn
+// → setSquares(Array(9).fill(null)) → clear board
+// → winner = null
+// → status = "Next Player: X"
+// → Game ready for new round
+
+// ============================================
+// CSS GRID LAYOUT
+// ============================================
+
+// .app_container:
+// → display: flex, flex-direction: column
+// → align-items: center
+// → Centers game board on page
+
+// .row:
+// → display: flex
+// → Creates horizontal row of squares
+
+// .square:
+// → width and height: 80px or similar
+// → font-size: large (40px+)
+// → border, background-color for visibility
+// → cursor: pointer for clickability
+// → Creates clickable game squares
+
+// .status:
+// → font-size, margin for visibility
+// → Shows game status clearly
+
+// .resetGame:
+// → margin-top for spacing
+// → padding, styling for button appearance
+
+// ============================================
+// KEY CONCEPTS
+// ============================================
+
+// Why Array(9).fill(null)? → Create array of specific length with default values
+// Why spread operator for newSquares? → Immutability, never mutate state
+// Why isXNext toggle? → Simple boolean flip between two players
+// Why row * 3 + col? → Convert 2D grid coordinates to 1D array index
+// Why check winner before move? → Prevent moves after game ends
+// Why nested map for board? → Create 3x3 grid structure dynamically
+// Why destructuring in calculateWinner? → Clean access to array values
+// Why squares[a] in condition? → Ensure position is not null (has been played)
+// Why return in handleClick if winner? → Stop execution, prevent further moves
+// 3x3 grid positions: top-left=0, center=4, bottom-right=8
+// Winning check logic: All three positions non-null and equal`,
+  },
+  {
+    title: '18_toastPopup',
+    code: `// ============================================
+// COMPONENT STRUCTURE
+// ============================================
+
+// App.jsx → renders <ToastNotification /> component
+// ToastNotification.jsx → contains all toast logic and configuration
+
+// ============================================
+// STATE MANAGEMENT
+// ============================================
+
+// State 1: horizontalPosition → useState('left')
+// → Controls left or right placement
+// → Options: 'left' or 'right'
+
+// State 2: verticalPosition → useState('top')
+// → Controls top or bottom placement
+// → Options: 'top' or 'bottom'
+
+// State 3: toastType → useState('success')
+// → Controls toast styling/color
+// → Options: 'success', 'error', 'warning', 'info'
+
+// State 4: message → useState('This is a toast message!')
+// → The text to display in toast
+// → User can customize this
+
+// State 5: duration → useState(5)
+// → How long toast stays visible (in seconds)
+// → Range: 3-10 seconds
+
+// State 6: toasts → useState([])
+// → Array storing all active toasts
+// → Each toast is object: { message, toastType, horizontalPosition, verticalPosition, time }
+
+// ============================================
+// useEffect: AUTO-REMOVE TOASTS
+// ============================================
+
+// Dependency array: [duration]
+// → Re-runs when duration changes
+
+// STEP 1: Create interval that runs every 1000ms (1 second)
+// → const timer = setInterval(() => { ... }, 1000)
+
+// STEP 2: Inside interval, filter toasts array
+// → setToasts((currentToasts) => currentToasts.filter(...))
+
+// STEP 3: Filter logic - calculate toast age
+// → const toastAge = Date.now() - toast.time
+// → Date.now() = current timestamp in milliseconds
+// → toast.time = timestamp when toast was created
+// → Subtraction gives age in milliseconds
+
+// Example calculation:
+// → toast.time = 1634567890000 (creation time)
+// → Date.now() = 1634567896000 (current time)
+// → toastAge = 6000ms (6 seconds old)
+
+// STEP 4: Keep toast if younger than duration
+// → return toastAge < duration * 1000
+// → duration * 1000 converts seconds to milliseconds
+// → Example: duration = 5 → 5000ms
+// → If toastAge = 4000ms → 4000 < 5000 → true (keep it)
+// → If toastAge = 6000ms → 6000 < 5000 → false (remove it)
+
+// STEP 5: Cleanup function
+// → return () => clearInterval(timer)
+// → Prevents memory leaks when component unmounts
+// → Also clears when duration changes (new interval created)
+
+// ============================================
+// showToast FUNCTION
+// ============================================
+
+// Purpose: Add new toast to toasts array
+
+// Logic:
+// → setToasts([...toasts, newToastObject])
+// → Spread existing toasts, add new one at end
+
+// New toast object structure:
+// → { message, toastType, horizontalPosition, verticalPosition, time: Date.now() }
+// → Uses current state values for all properties
+// → time: Date.now() → timestamp for tracking age
+
+// Example:
+// → { message: 'Success!', toastType: 'success', horizontalPosition: 'right', verticalPosition: 'bottom', time: 1634567890123 }
+
+// ============================================
+// removeToast FUNCTION
+// ============================================
+
+// Purpose: Manually remove specific toast
+
+// Accepts: time (timestamp of toast to remove)
+
+// Logic:
+// → setToasts((currentToasts) => currentToasts.filter((toast) => toast.time !== time))
+// → Filter out toast with matching timestamp
+// → Keep all toasts where time doesn't match
+
+// Example:
+// → removeToast(1634567890123)
+// → Removes toast with time: 1634567890123
+// → All other toasts remain
+
+// ============================================
+// JSX STRUCTURE - FORM SECTION
+// ============================================
+
+// Main container div with className 'container text-center'
+
+// Form element with className 'flex'
+
+// SECTION 1: Configuration inputs
+
+// Select 1 - Horizontal Position:
+// → value={horizontalPosition}
+// → onChange={(e) => setHorizontalPosition(e.target.value)}
+// → Options: 'left', 'right'
+
+// Select 2 - Vertical Position:
+// → value={verticalPosition}
+// → onChange={(e) => setVerticalPosition(e.target.value)}
+// → Options: 'top', 'bottom'
+
+// Select 3 - Toast Type:
+// → value={toastType}
+// → onChange={(e) => setToastType(e.target.value)}
+// → Options: 'success', 'error', 'warning', 'info'
+
+// Input - Message:
+// → type='text'
+// → value={message}
+// → onChange={(e) => setMessage(e.target.value)}
+// → placeholder='Message'
+
+// Input - Duration Slider:
+// → type='range'
+// → value={duration}
+// → onChange={(e) => setDuration(e.target.value)}
+// → min='3', max='10'
+// → Wrapped in label with text 'Duration'
+
+// Button - Show Toast:
+// → type='button'
+// → onClick={showToast}
+// → Text: 'Show Toast'
+
+// ============================================
+// JSX STRUCTURE - TOAST DISPLAY SECTION
+// ============================================
+
+// Toast container div:
+// → Dynamic className: \`toast-container tc-\${horizontalPosition}-\${verticalPosition}\`
+// → Example: 'toast-container tc-left-top'
+// → Example: 'toast-container tc-right-bottom'
+
+// Map over toasts array:
+// → toasts.map((toast, index) => ...)
+
+// For each toast, render div:
+// → key={index} for React list rendering
+// → className={\`toast \${toast.toastType}\`}
+// → Base class: 'toast'
+// → Type class: toast's toastType ('success', 'error', 'warning', 'info')
+
+// Inside toast div:
+
+// Span for message:
+// → className='toast-message'
+// → Display: {toast.message}
+
+// Button to remove:
+// → className='remove'
+// → onClick={() => removeToast(toast.time)}
+// → Display: &#x2715; (Unicode for ✕ symbol)
+
+// ============================================
+// CSS APPROACH - POSITIONING
+// ============================================
+
+// .toast-container:
+// → position: fixed (stays in place when scrolling)
+// → z-index: high value (appears above other content)
+// → pointer-events: none (allows clicks through container)
+
+// Position-specific classes (using template literal):
+
+// .tc-left-top:
+// → top: 1rem
+// → left: 1rem
+// → Toasts appear in top-left corner
+
+// .tc-left-bottom:
+// → bottom: 1rem
+// → left: 1rem
+// → Toasts appear in bottom-left corner
+
+// .tc-right-top:
+// → top: 1rem
+// → right: 1rem
+// → Toasts appear in top-right corner
+
+// .tc-right-bottom:
+// → bottom: 1rem
+// → right: 1rem
+// → Toasts appear in bottom-right corner
+
+// ============================================
+// CSS APPROACH - TOAST STYLING
+// ============================================
+
+// .toast (base styling):
+// → display: flex, justify-content: space-between
+// → padding: 1rem
+// → margin-bottom: 0.5rem (spacing between toasts)
+// → border-radius: for rounded corners
+// → pointer-events: auto (clickable, overrides container)
+// → animation: slide-in or fade-in for entrance effect
+
+// Type-specific colors:
+
+// .toast.success:
+// → background-color: green shade
+// → color: white
+
+// .toast.error:
+// → background-color: red shade
+// → color: white
+
+// .toast.warning:
+// → background-color: orange/yellow shade
+// → color: dark text
+
+// .toast.info:
+// → background-color: blue shade
+// → color: white
+
+// .remove button:
+// → background: transparent
+// → border: none
+// → cursor: pointer
+// → font-size: larger for visibility
+// → Hover effect for better UX
+
+// ============================================
+// TOAST NOTIFICATION FLOW
+// ============================================
+
+// Initial state:
+// → horizontalPosition = 'left'
+// → verticalPosition = 'top'
+// → toastType = 'success'
+// → message = 'This is a toast message!'
+// → duration = 5
+// → toasts = []
+// → No toasts visible
+
+// User configures settings:
+// → Selects horizontalPosition = 'right'
+// → Selects verticalPosition = 'bottom'
+// → Selects toastType = 'error'
+// → Types message = 'Something went wrong!'
+// → Adjusts duration slider to 7
+
+// User clicks "Show Toast":
+// → showToast() called
+// → New toast object created with current settings
+// → Toast appears in bottom-right corner with red styling
+// → Message displays: "Something went wrong!"
+
+// useEffect interval running (every 1 second):
+// → Checks all toasts in array
+// → Calculates age of each toast
+// → Toast created at 1634567890123, current time 1634567893123
+// → Age = 3000ms (3 seconds)
+// → Duration = 7 seconds (7000ms)
+// → 3000 < 7000 → true → toast stays
+
+// After 7 seconds:
+// → Current time 1634567897123
+// → Age = 7000ms
+// → 7000 < 7000 → false → toast removed automatically
+// → Toast disappears from screen
+
+// User clicks ✕ button manually (before duration expires):
+// → removeToast(1634567890123) called
+// → Filters out toast with matching time
+// → Toast immediately removed from array
+// → Toast disappears from screen
+
+// Multiple toasts:
+// → User clicks "Show Toast" 3 times quickly
+// → 3 toasts added to array with different timestamps
+// → All appear stacked (margin between them)
+// → Each auto-removes after 7 seconds from its creation
+// → Or can be manually removed individually
+
+// ============================================
+// KEY CONCEPTS
+// ============================================
+
+// Why Date.now()? → Unique timestamp for each toast, tracks creation time
+// Why setInterval? → Continuously check and remove old toasts
+// Why filter in interval? → Remove toasts older than duration
+// Why toastAge calculation? → Determine how long toast has been visible
+// Why duration * 1000? → Convert seconds to milliseconds for comparison
+// Why cleanup in useEffect? → Prevent memory leaks from running intervals
+// Why spread operator in showToast? → Preserve existing toasts, add new one
+// Why timestamp as key for removal? → Unique identifier for each toast
+// Why fixed position? → Toast stays in same screen position when scrolling
+// Why pointer-events? → Container non-clickable, but toasts are clickable
+// Why template literal for className? → Dynamic positioning based on state
+// filter returns new array → Immutability, keeps only matching items
+// index as key in map → Simple approach when items don't reorder`,
+  },
+  {
+    title: '19_todoList',
+    code: `// ============================================
+// COMPONENT STRUCTURE
+// ============================================
+
+// App.jsx → renders <TodoList /> component
+// TodoList.jsx → contains all todo list logic
+// data.js → initial todo items array
+
+// ============================================
+// DATA STRUCTURE
+// ============================================
+
+// initialItems from data.js:
+// → Array of todo objects
+// → Each object has 3 properties:
+//   - id: unique identifier (string)
+//   - text: todo item text (string)
+//   - isEditing: editing mode flag (boolean, default false)
+
+// Example:
+// → [{ id: '1', text: 'Buy groceries', isEditing: false }, ...]
+
+// ============================================
+// STATE MANAGEMENT
+// ============================================
+
+// State 1: todoItems → useState(initialItems)
+// → Stores all todo items
+// → Initialized with data from data.js file
+// → Each item has: id, text, isEditing
+
+// State 2: inputValue → useState('')
+// → Tracks value in add todo input field
+// → Starts as empty string
+
+// ============================================
+// JSX STRUCTURE
+// ============================================
+
+// Main container div with className 'container text-center'
+
+// SECTION 1: Form (for adding new todos)
+// → Form element with:
+//   - id='todoForm'
+//   - onSubmit={handleSubmit}
+
+// Inside form:
+// → Input field with:
+//   - type='text'
+//   - value={inputValue}
+//   - onChange={(e) => setInputValue(e.target.value)}
+//   - placeholder='Add a new item'
+//   - autoComplete='off'
+
+// SECTION 2: Todo list (ul element)
+// → ul with id='listContainer' and className='list-container'
+// → Map over todoItems: todoItems.map((item) => ...)
+
+// For each todo item, render li:
+// → key={item.id}
+
+// Inside li, three parts:
+
+// PART 1: Conditional display (edit mode vs view mode)
+// → Ternary: {item.isEditing ? ... : ...}
+
+// If isEditing is true:
+// → Input field with:
+//   - type='text'
+//   - value={item.text}
+//   - onChange={(e) => handleEditChange(e, item.id)}
+
+// If isEditing is false:
+// → Span with className='text'
+//   - Display: {item.text}
+
+// PART 2: Edit/Save button
+// → onClick={() => handleEdit(item.id)}
+// → Dynamic icon: {item.isEditing ? '💾' : '✏️'}
+// → Shows save icon (💾) when editing, pencil (✏️) otherwise
+
+// PART 3: Delete button
+// → className='delete'
+// → onClick={() => handleDelete(item.id)}
+// → Display: 🗑️ (trash icon)
+
+// SECTION 3: Empty state message
+// → Conditional: {todoItems.length === 0 && ...}
+// → Shows: "Ooops! List is empty" when no todos
+
+// ============================================
+// addTodoItem FUNCTION
+// ============================================
+
+// Purpose: Add new todo to list
+
+// Accepts: item (the text for new todo)
+
+// Logic:
+// → setTodoItems((prevItems) => [...prevItems, newTodoObject])
+// → Spread existing items, add new one at end
+
+// New todo object structure:
+// → { id: \`\${item}-\${Date.now()}\`, text: item, isEditing: false }
+
+// Why this id format?
+// → Combines item text with timestamp
+// → Ensures uniqueness (Date.now() gives unique milliseconds)
+// → Example: 'Buy milk-1634567890123'
+
+// isEditing defaults to false → new items not in edit mode
+
+// ============================================
+// handleDelete FUNCTION
+// ============================================
+
+// Purpose: Remove todo from list
+
+// Accepts: id (id of todo to delete)
+
+// Logic:
+// → setTodoItems((prevItems) => prevItems.filter((item) => item.id !== id))
+// → Keep all todos where id doesn't match
+// → Filter out the matching todo
+
+// Example:
+// → handleDelete('1')
+// → Removes todo with id: '1'
+// → All other todos remain
+
+// ============================================
+// handleEdit FUNCTION
+// ============================================
+
+// Purpose: Toggle edit mode for specific todo
+
+// Accepts: id (id of todo to edit)
+
+// Logic:
+// → setTodoItems((prevItems) => prevItems.map(...))
+// → Map over all items
+
+// For each item:
+// → Check: item.id === id
+// → If match: { ...item, isEditing: !item.isEditing }
+//   - Spread item properties
+//   - Toggle isEditing (true → false, false → true)
+// → If no match: return item unchanged
+
+// Example:
+// → Todo has isEditing: false
+// → Click edit button → handleEdit('1')
+// → isEditing becomes true
+// → Input field appears for editing
+// → Click save button → handleEdit('1')
+// → isEditing becomes false
+// → Span with text appears
+
+// ============================================
+// handleEditChange FUNCTION
+// ============================================
+
+// Purpose: Update todo text while editing
+
+// Accepts: (e, id)
+// → e: event object
+// → id: id of todo being edited
+
+// STEP 1: Get new value from input
+// → const newValue = e.target.value
+// → User's typed text
+
+// STEP 2: Update todos array
+// → setTodoItems((prevItems) => prevItems.map(...))
+// → Map over all items
+
+// For each item:
+// → Check: item.id === id
+// → If match: { ...item, text: newValue }
+//   - Spread item properties
+//   - Replace text with newValue
+// → If no match: return item unchanged
+
+// Example:
+// → User types in edit input
+// → Every keystroke triggers onChange
+// → handleEditChange updates text in state
+// → Input reflects new text immediately (controlled component)
+
+// ============================================
+// handleSubmit FUNCTION (ADD TODO)
+// ============================================
+
+// Purpose: Handle form submission to add new todo
+
+// Accepts: e (event object)
+
+// STEP 1: Prevent default form behavior
+// → e.preventDefault()
+// → Stops page refresh on submit
+
+// STEP 2: Check if input has value
+// → if (inputValue)
+// → Only proceed if not empty string
+
+// STEP 3: Add new todo
+// → addTodoItem(inputValue)
+// → Passes current input value
+
+// STEP 4: Clear input field
+// → setInputValue('')
+// → Resets to empty string
+// → Ready for next todo
+
+// Trigger: User presses Enter key or submits form
+
+// ============================================
+// TODO LIST FLOW
+// ============================================
+
+// Initial state:
+// → todoItems = initialItems from data.js
+// → inputValue = ''
+// → List displays all initial todos
+// → All todos in view mode (not editing)
+
+// User types in add input:
+// → inputValue updates with each keystroke
+// → Controlled input reflects state
+
+// User presses Enter (submit form):
+// → handleSubmit called
+// → e.preventDefault() stops page refresh
+// → Check: inputValue not empty
+// → addTodoItem(inputValue) adds new todo
+// → New todo object: { id: 'text-timestamp', text: inputValue, isEditing: false }
+// → Added to todoItems array
+// → setInputValue('') clears input
+// → New todo appears in list
+
+// User clicks edit button (✏️):
+// → handleEdit(item.id) called
+// → Maps through todos, finds matching id
+// → Toggles isEditing from false to true
+// → Conditional rendering switches to input field
+// → User can now edit text
+// → Button changes to save icon (💾)
+
+// User edits text in edit input:
+// → handleEditChange(e, item.id) called on each keystroke
+// → newValue = e.target.value
+// → Maps through todos, finds matching id
+// → Updates text property with newValue
+// → Input reflects changes immediately
+
+// User clicks save button (💾):
+// → handleEdit(item.id) called again
+// → Toggles isEditing from true to false
+// → Conditional rendering switches to span
+// → Updated text displayed
+// → Button changes back to edit icon (✏️)
+
+// User clicks delete button (🗑️):
+// → handleDelete(item.id) called
+// → Filters out todo with matching id
+// → Todo removed from list
+// → Remaining todos displayed
+
+// All todos deleted:
+// → todoItems.length === 0
+// → Conditional message appears: "Ooops! List is empty"
+
+// ============================================
+// CSS APPROACH
+// ============================================
+
+// .container:
+// → Center content on page
+// → display: flex, flex-direction: column
+// → align-items: center
+
+// #todoForm:
+// → Margin bottom for spacing
+// → Width for form size
+
+// Input fields:
+// → Padding, border, border-radius for appearance
+// → Focus styles for better UX
+
+// .list-container:
+// → list-style: none (no bullet points)
+// → padding: 0
+
+// li (todo item):
+// → display: flex
+// → justify-content: space-between
+// → align-items: center
+// → padding, margin for spacing
+// → border or background for visibility
+
+// .text (todo text span):
+// → flex: 1 (takes available space)
+// → text-align: left
+
+// Buttons (.edit, .delete):
+// → Padding, margin for spacing
+// → cursor: pointer
+// → background, border styling
+// → Hover effects for better UX
+// → Font size for emoji visibility
+
+// .no-elements (empty state):
+// → Font styling, color
+// → Center alignment
+// → Padding for spacing
+
+// ============================================
+// KEY CONCEPTS
+// ============================================
+
+// Why isEditing property? → Track which todos are in edit mode
+// Why controlled inputs? → React controls value, enables validation
+// Why e.preventDefault()? → Prevent page refresh on form submit
+// Why Date.now() in id? → Create unique timestamps for ids
+// Why map for updates? → Immutability, create new array with changes
+// Why filter for delete? → Create new array without deleted item
+// Why spread operator? → Preserve other properties when updating
+// Why conditional rendering? → Show input or span based on mode
+// Why dynamic button icon? → Visual feedback for current state
+// Why clear input after submit? → Better UX, ready for next input
+// Why check inputValue in submit? → Prevent adding empty todos
+// Template literal for id → Combine text and timestamp
+// Ternary operator → Concise conditional rendering
+// Map returns new array → Immutability principle in React`,
+  },
+  {
+    title: '20_typeahead',
+    code: `// In App.jsx, I will simply write TypeAhead.jsx
+// In TypeAhead.jsx component
+// Step 1: useState declaration 
+// i) 1st useState variable --> is for query that user types
+// ii) 2nd useState variable --> is for results array (API Call results)
+// iii) 3rd useState variable ---> is for loading (API Call loading)
+
+// Step 2: If I directly jump on return jsx part, then 
+// i) I will be maintaining input with type text, onChange of setQuery(e.target.value)
+// ii) inside ul, I will be doing apiResultsArrVariable.map and I want to show img and anchor tag for routing to user github page
+
+// Step 3: CORE logic of typeAhead
+// i) I will be maintaining a minLength variable to avoid api calls (ex: 3 should be the min no. of characters that user has to type to trigger an API call)
+// ii) My logic is placed inside setTimeout
+// iii) if query.length >= minLength then setLoading to true, fetchUsersFunc(queryParam, signalParam).then().catch()
+// iv) else, setResults array to [] and setLoading to false
+// v) additionally we are using AbortController to cancel api calls`,
+  },
 ];
