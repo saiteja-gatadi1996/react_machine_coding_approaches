@@ -1,0 +1,84 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark theme */
+.dark {
+  background-color: #2f2f2f;
+  color: #d4d4d4;
+  min-height: 100vh;
+}
+
+.dark .header {
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #404040;
+}
+
+.dark .theme-toggle {
+  background-color: #404040;
+  color: #d4d4d4;
+}
+
+.dark .theme-toggle:hover {
+  background-color: #4a4a4a;
+}
+
+/* Light theme */
+.light {
+  background-color: #ffffff;
+  color: #000000;
+  min-height: 100vh;
+}
+
+.light .header {
+  background-color: #f3f3f3;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.light .theme-toggle {
+  background-color: #e5e5e5;
+  color: #000000;
+}
+
+.light .theme-toggle:hover {
+  background-color: #d4d4d4;
+}
+
+/* Layout */
+.header {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header h1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.theme-toggle {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
