@@ -1,0 +1,246 @@
+.code-card {
+ padding: 16px 20px;
+ cursor: pointer;
+ font-size: 16px;
+ font-weight: 600;
+ border-radius: 4px;
+ transition: all 0.2s ease;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ user-select: none;
+ margin-bottom: 12px;
+}
+
+.code-card:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.code-card:active {
+ transform: translateY(0);
+}
+
+.card-title {
+ flex: 1;
+}
+
+.card-icon {
+ font-size: 18px;
+ transition: transform 0.2s ease;
+}
+
+.code-card:hover .card-icon {
+ transform: translateX(4px);
+}
+
+/* Dark theme */
+.dark .code-card {
+ background-color: #252525;
+ border: 1px solid #404040;
+ color: #d4d4d4;
+}
+
+.dark .code-card:hover {
+ background-color: #2f2f2f;
+ border-color: #4a4a4a;
+}
+
+/* Light theme */
+.light .code-card {
+ background-color: #f3f3f3;
+ border: 1px solid #e5e5e5;
+ color: #000000;
+}
+
+.light .code-card:hover {
+ background-color: #e8e8e8;
+ border-color: #d4d4d4;
+}
+
+/* ============================================ */
+/* RESPONSIVE CARD STYLES */
+/* ============================================ */
+
+@media (max-width: 1024px) {
+ .code-card {
+  padding: 14px 18px;
+  font-size: 15px;
+ }
+}
+
+@media (max-width: 768px) {
+ .code-card {
+  padding: 12px 16px;
+  font-size: 14px;
+  margin-bottom: 10px;
+ }
+
+ .card-icon {
+  font-size: 16px;
+ }
+}
+
+@media (max-width: 480px) {
+ .code-card {
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 8px;
+ }
+
+ .card-icon {
+  font-size: 14px;
+ }
+}
+
+/* Modal controls container */
+.modal-controls {
+ display: flex;
+ gap: 8px;
+ align-items: center;
+}
+
+.modal-maximize {
+ background: none;
+ border: none;
+ font-size: 24px;
+ cursor: pointer;
+ padding: 4px 8px;
+ line-height: 1;
+ border-radius: 4px;
+ transition: background-color 0.2s ease;
+ min-height: 44px;
+ min-width: 44px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+
+/* Maximized state styles */
+.modal-backdrop.maximized {
+ padding: 0;
+}
+
+.modal-container.maximized {
+ max-width: 100%;
+ max-height: 100vh;
+ height: 100vh;
+ border-radius: 0;
+ animation: none;
+}
+
+/* Dark theme maximize button */
+.modal-backdrop.dark .modal-maximize {
+ color: #d4d4d4;
+}
+
+.modal-backdrop.dark .modal-maximize:hover {
+ background-color: #404040;
+}
+
+/* Light theme maximize button */
+.modal-backdrop.light .modal-maximize {
+ color: #000000;
+}
+
+.modal-backdrop.light .modal-maximize:hover {
+ background-color: #e5e5e5;
+}
+
+/* Adjust close button to align with maximize */
+.modal-close {
+ background: none;
+ border: none;
+ font-size: 24px;
+ cursor: pointer;
+ padding: 4px 8px;
+ line-height: 1;
+ border-radius: 4px;
+ transition: background-color 0.2s ease;
+ min-height: 44px;
+ min-width: 44px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+}
+
+/* ============================================ */
+/* CUSTOM SCROLLBAR STYLING */
+/* ============================================ */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.modal-code-wrapper::-webkit-scrollbar {
+ width: 12px;
+ height: 12px;
+}
+
+.modal-code-wrapper::-webkit-scrollbar-track {
+ background: transparent;
+}
+
+.modal-code-wrapper::-webkit-scrollbar-thumb {
+ border-radius: 6px;
+ border: 2px solid transparent;
+ background-clip: content-box;
+}
+
+.modal-code-wrapper::-webkit-scrollbar-thumb:hover {
+ border-width: 1px;
+}
+
+/* Dark theme scrollbar */
+.modal-backdrop.dark .modal-code-wrapper::-webkit-scrollbar-thumb {
+ background-color: #4a4a4a;
+}
+
+.modal-backdrop.dark .modal-code-wrapper::-webkit-scrollbar-thumb:hover {
+ background-color: #5a5a5a;
+}
+
+.modal-backdrop.dark .modal-code-wrapper::-webkit-scrollbar-track {
+ background-color: #2f2f2f;
+}
+
+/* Light theme scrollbar */
+.modal-backdrop.light .modal-code-wrapper::-webkit-scrollbar-thumb {
+ background-color: #c0c0c0;
+}
+
+.modal-backdrop.light .modal-code-wrapper::-webkit-scrollbar-thumb:hover {
+ background-color: #a0a0a0;
+}
+
+.modal-backdrop.light .modal-code-wrapper::-webkit-scrollbar-track {
+ background-color: #f5f5f5;
+}
+
+/* Firefox scrollbar styling */
+.modal-backdrop.dark .modal-code-wrapper {
+ scrollbar-width: thin;
+ scrollbar-color: #4a4a4a #2f2f2f;
+}
+
+.modal-backdrop.light .modal-code-wrapper {
+ scrollbar-width: thin;
+ scrollbar-color: #c0c0c0 #f5f5f5;
+}
+
+/* Mobile scrollbar adjustments */
+@media (max-width: 768px) {
+ .modal-code-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+ }
+
+ .modal-maximize {
+  min-height: 40px;
+  min-width: 40px;
+  font-size: 24px;
+ }
+
+ .modal-close {
+  font-size: 20px;
+  min-height: 40px;
+  min-width: 40px;
+ }
+}

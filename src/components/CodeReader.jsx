@@ -1,19 +1,23 @@
 import { useState } from 'react';
-import AccordionSection from './AccordionSection';
+import CodeCard from './CodeCard';
+import CodeModal from './CodeModal';
 import { codingApproaches } from '../data/codingApproaches';
 import './CodeReader.css';
 
 export default function CodeReader() {
   const [theme, setTheme] = useState('dark');
-  const [openIndex, setOpenIndex] = useState(null); // Track which accordion is open
+  const [selectedApproach, setSelectedApproach] = useState(null);
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  const handleToggle = (index) => {
-    // If clicking the same accordion, close it. Otherwise, open the new one.
-    setOpenIndex(openIndex === index ? null : index);
+  const openModal = (approach) => {
+    setSelectedApproach(approach);
+  };
+
+  const closeModal = () => {
+    setSelectedApproach(null);
   };
 
   return (
@@ -27,16 +31,21 @@ export default function CodeReader() {
 
       <div className='container'>
         {codingApproaches.map((approach, index) => (
-          <AccordionSection
+          <CodeCard
             key={index}
             title={approach.title}
-            code={approach.code}
-            index={index}
-            isOpen={openIndex === index}
-            onToggle={() => handleToggle(index)}
+            onClick={() => openModal(approach)}
           />
         ))}
       </div>
+
+      <CodeModal
+        isOpen={!!selectedApproach}
+        onClose={closeModal}
+        title={selectedApproach?.title || ''}
+        code={selectedApproach?.code || ''}
+        theme={theme}
+      />
     </div>
   );
 }
