@@ -1885,19 +1885,6 @@ transform: translateX(100%)
 // → Stores the selected/clicked rating (1-5)
 // → Starts at 0 (no rating selected)
 
-// State 2: hoverRating → useState(0)
-// → Stores temporary preview rating on hover
-// → Starts at 0 (no hover)
-
-// ============================================
-// CURRENT RATING LOGIC
-// ============================================
-
-// const currentRating = hoverRating || rating
-// → Shows hover preview when hovering
-// → Falls back to actual rating when not hovering
-// → OR operator: if hoverRating is 0 (falsy), uses rating
-
 // ============================================
 // RATING MESSAGES ARRAY
 // ============================================
@@ -1964,7 +1951,6 @@ transform: translateX(100%)
 // key={index} → React key for list rendering
 
 // className logic:
-// → \`star \${fullStar ? 'full' : ''}\`
 // → Base class: 'star'
 // → Conditional class: 'full' added when fullStar is true
 
@@ -2105,7 +2091,9 @@ transform: translateX(100%)
 // Why two unicode stars? → ★ filled (U+2605), ☆ empty (U+2606)
 // .star.full selector → Targets elements with both classes
 // OR operator short-circuit → If first truthy, uses it; otherwise second
-// Greater than comparison → index 0,1,2 are < rating 3, so all filled`,
+// Greater than comparison → index 0,1,2 are < rating 3, so all filled
+
+`,
   },
   {
     title: '16_starRating_half_star',
