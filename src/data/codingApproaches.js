@@ -4536,77 +4536,123 @@ const handleTemplateChange = (setter) => (e) => setter(e.target.value);
 
 // App.jsx → renders <Tabs /> component
 // Tabs.jsx → main component managing active tab state
-// Tab.jsx → individual tab button component
+// Tab.jsx → individual tab button component 
 
 // ============================================
-// TABS.JSX - STATE MANAGEMENT
+// TABS.JSX
 // ============================================
 
-// State: activeTab → useState(1)
-// → Tracks which tab is currently active
-// → Stores tab ID (1, 2, or 3)
-// → Default: 1 (first tab active on load)
-
+//  Define tabs as array of objects
 // ============================================
-// CONTENT OBJECT
+// TABSDATA ARRAY STRUCTURE
 // ============================================
 
-// Purpose: Map tab IDs to their content
+// Purpose: Store all tab configuration in one place
 
 // Structure:
-// → const content = { 1: 'Content for tab 1', 2: 'Content for tab 2', 3: 'Content for tab 3' }
-// → Keys are tab IDs (numbers)
-// → Values are content strings
+// → const tabsData = [ { id, label, content }, { id, label, content }, ... ]
+// → Each object represents one tab
+// → Properties:
+//   - id: unique identifier (number)
+//   - label: text displayed on tab button (string)
+//   - content: content to display when tab active (string or JSX)
 
-// Access pattern:
-// → content[activeTab]
-// → Example: activeTab = 2 → content[2] → 'Content for tab 2'
-
-// Note: Could be expanded to JSX content instead of strings
-// → Example: { 1: <div>Complex JSX here</div>, ... }
+// Example:
+// → { id: 1, label: 'Tab 1', content: 'Content for tab 1' }
+// → { id: 2, label: 'Tab 2', content: 'Content for tab 2' }
 
 // ============================================
-// JSX STRUCTURE (TABS.JSX)
+// STATE MANAGEMENT
+// ============================================
+
+// State: activeTab → useState(tabsData[0].id)
+// → Tracks which tab is currently active
+// → Stores tab ID from tabsData array
+// → Default: tabsData[0].id (first tab in array)
+// → Dynamic default based on array content
+
+// Why tabsData[0].id instead of hardcoded 1?
+// → Works regardless of what IDs you use
+// → If tabsData changes, default still works
+// → More flexible and maintainable
+
+// ============================================
+// FINDING ACTIVE CONTENT
+// ============================================
+
+// Purpose: Get content for currently active tab
+
+// Method: Array.find() with optional chaining
+// → const activeContent = tabsData.find((tab) => tab.id === activeTab)?.content
+
+// Callback function: (tab) => tab.id === activeTab
+// → Parameter 'tab' represents current tab object in iteration
+// → Compares tab.id with activeTab state
+// → Returns true when match found
+
+// Example with activeTab = 2:
+// → Iteration 1: tab = { id: 1, ... } → 1 === 2 → false → continue
+// → Iteration 2: tab = { id: 2, ... } → 2 === 2 → true → RETURN this object
+// → Result: { id: 2, label: 'Tab 2', content: 'Content for tab 2' }
+
+// Optional chaining operator (?.)
+// → Safely accesses .content property
+// → If find() returns object → access .content → 'Content for tab 2'
+// → If find() returns undefined → short-circuit → return undefined (no error)
+// → Prevents: Cannot read property 'content' of undefined
+
+// Alternative without optional chaining:
+// → const activeTabObj = tabsData.find((tab) => tab.id === activeTab)
+// → const activeContent = activeTabObj ? activeTabObj.content : null
+
+// ============================================
+// JSX STRUCTURE (TABS.JSX) - DYNAMIC RENDERING
 // ============================================
 
 // Main container: div with className 'container'
 
 // Inner wrapper div
 
-// SECTION 1: Tabs header
+// SECTION 1: Tabs header (REFACTORED)
 // → div with className 'tabs-header'
-// → Contains all Tab button components
+// → Contains dynamically generated Tab components
 
-// Tab components (3 instances):
+// Dynamic Tab generation using .map():
+// → {tabsData.map((tab) => <Tab key={tab.id} ... />)}
 
-// Tab 1:
-// → Props: label='Tab 1', id={1}, activeTab={activeTab}, setActiveTab={setActiveTab}
+// Map callback: (tab) => <Tab key={tab.id} label={tab.label} ... />
+// → Parameter 'tab' represents current tab object
+// → Access properties: tab.id, tab.label, tab.content
 
-// Tab 2:
-// → Props: label='Tab 2', id={2}, activeTab={activeTab}, setActiveTab={setActiveTab}
+// Key prop importance:
+// → key={tab.id} → unique identifier for React
+// → React uses key to track which items changed/added/removed
+// → Optimizes re-rendering performance
+// → Should be stable (same ID each render)
+// → Should be unique (no two tabs with same ID)
 
-// Tab 3:
-// → Props: label='Tab 3', id={3}, activeTab={activeTab}, setActiveTab={setActiveTab}
+// Props passed to each Tab:
+// → label={tab.label} → extracted from tab object
+// → id={tab.id} → extracted from tab object
+// → activeTab={activeTab} → current state from parent
+// → setActiveTab={setActiveTab} → state setter from parent
 
-// Why pass activeTab and setActiveTab to each?
-// → Each Tab needs to know if it's active (for styling)
-// → Each Tab needs ability to update active state (on click)
-
-// SECTION 2: Content display
+// SECTION 2: Content display (UPDATED)
 // → div with className 'tab-content'
-// → Display: {content[activeTab]}
+// → Display: {activeContent}
+// → activeContent comes from .find() method
 // → Dynamically shows content based on active tab
-// → Example: activeTab = 1 → shows 'Content for tab 1'
+// → Example: activeTab = 2 → activeContent = 'Content for tab 2'
 
 // ============================================
 // TAB.JSX - INDIVIDUAL TAB COMPONENT
 // ============================================
 
-// Purpose: Render single tab button with active styling
+// Purpose: Render single tab button with active styling (UNCHANGED)
 
 // Props: { label, id, activeTab, setActiveTab }
-// → label: button text (e.g., 'Tab 1')
-// → id: unique tab identifier (1, 2, or 3)
+// → label: button text (comes from tabsData[].label)
+// → id: unique tab identifier (comes from tabsData[].id)
 // → activeTab: current active tab ID from parent
 // → setActiveTab: function to update active tab
 
@@ -4614,181 +4660,42 @@ const handleTemplateChange = (setter) => (e) => setter(e.target.value);
 // HANDLECLICK FUNCTION (TAB.JSX)
 // ============================================
 
-// Purpose: Update active tab when button clicked
+// Purpose: Update active tab when button clicked (UNCHANGED)
 
 // Logic:
 // → const handleClick = () => { setActiveTab(id) }
-// → Simply calls parent's setActiveTab with this tab's id
+// → Calls parent's setActiveTab with this tab's id
 
 // Example:
 // → User clicks Tab 2 (id = 2)
 // → handleClick runs
 // → setActiveTab(2) called
 // → Parent's activeTab state becomes 2
+// → Parent re-renders
+// → .find() returns new active content
 // → All Tab components re-render with new activeTab prop
 
 // ============================================
 // ISACTIVE CALCULATION (TAB.JSX)
 // ============================================
 
-// Purpose: Determine if this tab is currently active
+// Purpose: Determine if this tab is currently active (UNCHANGED)
 
 // Logic:
 // → const isActive = activeTab === id
 // → Compares parent's activeTab with this tab's id
 // → Returns boolean
 
-// Example:
-// → Tab id = 2, activeTab = 2 → isActive = true
-// → Tab id = 1, activeTab = 2 → isActive = false
-
 // ============================================
 // JSX STRUCTURE (TAB.JSX)
 // ============================================
 
-// Wrapper div (could be fragment)
+// Wrapper div
 
-// Button element:
+// Button element: (UNCHANGED)
 // → onClick={handleClick} → triggers tab change
-// → tabIndex={0} → makes keyboard accessible
-//   - Base class: 'tab-button' (always present)
-//   - Conditional class: 'active' (only when isActive is true)
+// → tabIndex={0} → keyboard accessible
 // → Display: {label}
-
-// Example className values:
-// → isActive = true → 'tab-button active'
-// → isActive = false → 'tab-button'
-
-// ============================================
-// TABS FLOW
-// ============================================
-
-// Initial render:
-// → activeTab = 1 (default state)
-// → Content displays: 'Content for tab 1'
-// → Tab 1: id=1, activeTab=1 → isActive=true → className='tab-button active'
-// → Tab 2: id=2, activeTab=1 → isActive=false → className='tab-button'
-// → Tab 3: id=3, activeTab=1 → isActive=false → className='tab-button'
-
-// User clicks Tab 2 button:
-// → Tab 2's handleClick triggered
-// → setActiveTab(2) called
-// → Tabs component's activeTab state updates to 2
-// → Tabs component re-renders
-
-// After re-render:
-// → activeTab = 2
-// → Content displays: 'Content for tab 2'
-// → Tab 1: id=1, activeTab=2 → isActive=false → className='tab-button'
-// → Tab 2: id=2, activeTab=2 → isActive=true → className='tab-button active'
-// → Tab 3: id=3, activeTab=2 → isActive=false → className='tab-button'
-
-// User clicks Tab 3 button:
-// → setActiveTab(3)
-// → activeTab = 3
-// → Content displays: 'Content for tab 3'
-// → Tab 3 becomes active, others inactive
-
-// User clicks already active tab (Tab 3):
-// → handleClick still runs
-// → setActiveTab(3) called again
-// → activeTab stays 3
-// → No visible change (already active)
-
-// ============================================
-// CSS APPROACH
-// ============================================
-
-// .container:
-// → Center content on page
-// → Padding, max-width for layout
-
-// .tabs-header:
-// → display: flex
-// → flex-direction: row (horizontal tabs)
-// → border-bottom or similar for tab bar appearance
-
-// .tab-button (base styling):
-// → padding: for button size
-// → border: style tab borders
-// → background-color: default inactive color
-// → cursor: pointer
-// → transition: for smooth style changes
-// → border-bottom: none or transparent (merges with content)
-
-// .tab-button.active (active state):
-// → background-color: different color (highlight active)
-// → border-bottom: solid color matching content area
-// → font-weight: bold (make text stand out)
-// → color: different text color if needed
-
-// Example styling pattern:
-// → Inactive tabs: grey background, normal text
-// → Active tab: white background, bold text, bottom border removed
-// → Creates effect of active tab "connecting" to content area
-
-// .tab-content:
-// → padding: space around content
-// → border: matches tab styling
-// → background-color: matches active tab
-// → min-height: prevents layout shift when switching
-
-// ============================================
-// ALTERNATIVE IMPLEMENTATIONS
-// ============================================
-
-// Dynamic tab generation (instead of hardcoding 3 tabs):
-// → Define tabs array: const tabs = [{ id: 1, label: 'Tab 1' }, ...]
-// → Map over array: tabs.map((tab) => <Tab key={tab.id} {...tab} ... />)
-
-// Content as props instead of object:
-// → Pass content directly to each Tab
-// → Tab stores its own content
-// → Display content of active tab differently
-
-// Using React Context (for deeply nested tabs):
-// → Create TabsContext with activeTab and setActiveTab
-// → Avoid prop drilling through multiple levels
-// → Useful if Tab components are nested deeper
-
-// Controlled vs Uncontrolled:
-// → Current: Controlled (parent manages state)
-// → Could be: Uncontrolled (Tabs manages own state internally)
-// → Controlled is better for parent needing access to active tab
-
-// ============================================
-// ACCESSIBILITY CONSIDERATIONS
-// ============================================
-
-// tabIndex={0}:
-// → Makes button keyboard focusable
-// → Already accessible as button element, but explicit is clear
-
-// Could add:
-// → role='tab' on buttons
-// → role='tablist' on tabs-header
-// → role='tabpanel' on tab-content
-// → aria-selected={isActive} on buttons
-// → aria-controls linking button to content panel
-// → Keyboard navigation (Arrow keys to switch tabs)
-
-// ============================================
-// KEY CONCEPTS
-// ============================================
-
-// Why single state in parent? → Single source of truth, easier to manage
-// Why pass both activeTab and setActiveTab? → Tab needs to read and write state
-// Why id prop on each Tab? → Identify which tab was clicked
-// Why template literal for className? → Combine base and conditional classes
-// Why content object with numeric keys? → Map IDs directly to content
-// Why tabIndex={0}? → Explicit keyboard accessibility
-// Why comparison for isActive? → Simple boolean check for styling
-// Why not useState in Tab? → Parent controls which tab is active
-// Prop drilling → Passing props through component tree (activeTab, setActiveTab)
-// Lifting state up → State in parent, not in children
-// content[activeTab] → Dynamic object property access using variable
-// Template literal className → Combines static and dynamic class names
-// === comparison → Strict equality check for active state
 `,
   },
   {
