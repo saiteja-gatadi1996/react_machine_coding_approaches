@@ -218,7 +218,8 @@ export const codingApproaches = [
 
 // Styling classes: For hand: background: black, height:6px, position: absolute, top: 50%, transform-origin: 100%,
 
-// Styling classes: hour-hand, min-hand, second-hand (has width and right), with right as constant (Ex: right: 50%) and width varies from 30% for hour-hand and 40% for min-hand and 45% for second-hand
+// Styling classes: hour-hand, min-hand, second-hand (has width and right), with right as constant (Ex: right: 50%) 
+// and width varies from 30% for hour-hand and 40% for min-hand and 45% for second-hand
 
 // make sure to add a inline style which holds transform: rotate(degrees)deg`,
   },
@@ -1351,7 +1352,8 @@ export const codingApproaches = [
 
 // Step 1: for nav tag --> Write the same logic to center a div/content
 
-// Step 2: for ul tag has the className called "nav__menu", as this holds li items, so you must have to write display: flex and put some gap: 3em as mandatory (rest are your choice)
+// Step 2: for ul tag has the className called "nav__menu", as this holds li items, 
+// so you must have to write display: flex and put some gap: 3em as mandatory (rest are your choice)
 
 // Step 3: our navToggle div has the className called "nav__toggler", which we will hide using display:none initially
 
@@ -1367,7 +1369,9 @@ export const codingApproaches = [
 
 // In the mobile Mode, we change the display: none to display:block for "nav__toggler" className
 
-// Inside the @media, for className "nav__menu", I have to make the position: fixed, with some top, right: 0, and height of this (ex: 93vh), width: 50vw, flex-direction:column, and this transform in the translateX direction with 100%
+// Inside the @media, for className "nav__menu", 
+// I have to make the position: fixed, with some top, right: 0, and height of this (ex: 93vh), width: 50vw, flex-direction:column, 
+// and this transform in the translateX direction with 100%
 
 // translateX(0%) means we are showing it ---> that means it is active (Ex: nav__active)
 

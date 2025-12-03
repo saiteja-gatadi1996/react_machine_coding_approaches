@@ -13,6 +13,8 @@ function AccordionSection({ title, code, isOpen, onToggle }) {
 
   const renderCode = (codeString) => {
     const lines = codeString.split('\n');
+    let insideMultiLineComment = false;
+
     return (
       <div className='code-wrapper'>
         <div className='line-numbers'>
@@ -24,7 +26,21 @@ function AccordionSection({ title, code, isOpen, onToggle }) {
         </div>
         <div className='code-content'>
           {lines.map((line, idx) => {
-            const isComment = line.trim().startsWith('//');
+            const trimmed = line.trim();
+
+            // Check if this line starts a multi-line comment
+            if (trimmed.includes('/*') && !insideMultiLineComment) {
+              insideMultiLineComment = true;
+            }
+
+            // Determine if current line is a comment
+            const isComment =
+              trimmed.startsWith('//') || insideMultiLineComment;
+
+            // Check if this line ends a multi-line comment
+            if (trimmed.includes('*/') && insideMultiLineComment) {
+              insideMultiLineComment = false;
+            }
 
             return (
               <div
